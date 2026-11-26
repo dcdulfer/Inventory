@@ -825,8 +825,7 @@
     }
 
     function formatSupplierPlainText(items) {
-      return items.map(it => `${it.qty} ${it.unit} - ${it.name}`).join('
-');
+      return items.map(it => `${it.qty} ${it.unit} - ${it.name}`).join('\n');
     }
 
     function renderOrdersView() {
@@ -1367,8 +1366,7 @@
     // =========================================================================
     function csvEscape(val) {
       const str = String(val ?? '');
-      if (str.includes('"') || str.includes(',') || str.includes('
-') || str.includes('')) {
+      if (str.includes('"') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
         return '"' + str.replace(/"/g, '""') + '"';
       }
       return str;
@@ -1390,8 +1388,7 @@
         lines.push([csvEscape(it.name), csvEscape(it.location), csvEscape(it.supplier), csvEscape(it.unit)].join(','));
       });
 
-      const blob = new Blob(['﻿' + lines.join('
-')], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -1428,15 +1425,13 @@
           } else if (ch === ',') {
             row.push(cell.trim());
             cell = '';
-          } else if (ch === '' && next === '
-') {
+          } else if (ch === '\r' && next === '\n') {
             row.push(cell.trim());
             rows.push(row);
             row = [];
             cell = '';
             i++;
-          } else if (ch === '
-' || ch === '') {
+          } else if (ch === '\n' || ch === '\r') {
             row.push(cell.trim());
             rows.push(row);
             row = [];
