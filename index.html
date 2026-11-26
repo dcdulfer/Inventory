@@ -4,1603 +4,220 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0B0B0C" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Barraco's Order" />
-  <meta name="mobile-web-app-capable" content="yes" />
   <title>Barraco's Daily Purchasing</title>
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            barraco: {
-              black: '#0B0B0C',
-              dark: '#161618',
-              crimson: '#C82333',
-              crimsonDark: '#A31B28',
-              green: '#15803D',
-              greenBright: '#16A34A'
-            }
-          }
-        }
-      }
-    };
-  </script>
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      background-color: #F1F5F9;
-      -webkit-tap-highlight-color: transparent;
-      overscroll-behavior-y: none;
-    }
-    .safe-top {
-      padding-top: env(safe-area-inset-top, 0px);
-    }
-    .safe-bottom {
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-    /* Hide scrollbars cleanly on horizontal location pills */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    .drag-handle {
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .item-card-dragging {
-      opacity: 0.35;
-      border-style: dashed !important;
-      border-color: #C82333 !important;
-      background-color: #FEF2F2 !important;
-    }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
-  </style>
 </head>
-<body class="flex flex-col h-full text-slate-900 select-none">
-
-  <!-- TOP HEADER WITH BARRACO'S VECTOR BRAND LOCKUP & 3-TAB BAR -->
-  <header class="bg-[#0B0B0C] text-white shrink-0 shadow-md z-30 safe-top overflow-x-hidden">
-    <div class="max-w-7xl mx-auto px-3 sm:px-5 pt-2 pb-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-      <!-- Brand Lockup -->
-      <div class="flex items-center justify-between min-w-0">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <!-- Custom Vector Barraco's Lockup -->
-          <svg class="h-9 sm:h-11 w-auto shrink-0" viewBox="0 0 360 88" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Barraco's Ristorante, Pizzeria and Catering">
-            <!-- Dropped-baseline B -->
-            <text x="4" y="62" fill="#C82333" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="66" letter-spacing="-1">B</text>
-            <!-- ARRACO' -->
-            <text x="49" y="52" fill="#C82333" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="47" letter-spacing="1.5">ARRACO'</text>
-            <!-- Dropped-baseline S -->
-            <text x="294" y="62" fill="#C82333" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="66">S</text>
-            <!-- Rounded Italian Green Bar -->
-            <rect x="52" y="57" width="238" height="7.5" rx="3.75" fill="#16A34A" />
-            <!-- White Subtitle -->
-            <text x="52" y="81" fill="#FFFFFF" font-family="Georgia, 'Times New Roman', serif" font-size="16.5" letter-spacing="0.4">Ristorante, Pizzeria and Catering</text>
-          </svg>
-        </div>
-        <div class="flex items-center gap-2 sm:hidden">
-          <span id="header-badge-mobile" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-slate-200">0 items</span>
-        </div>
-      </div>
-
-      <!-- Equal-Width 3-Tab Navigation (Guaranteed visible in 360px portrait) -->
-      <nav class="grid grid-cols-3 gap-1.5 w-full sm:w-auto sm:min-w-[360px] bg-white/10 p-1 rounded-xl" role="tablist">
-        <button id="tab-btn-count" onclick="switchTab('count')" role="tab" aria-selected="true"
-          class="min-h-[44px] px-2 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-[#C82333] text-white shadow">
-          <span>Daily Count</span>
-          <span id="badge-count-tab" class="px-1.5 py-0.5 text-[11px] rounded-full bg-black/30 text-white">0</span>
-        </button>
-        <button id="tab-btn-orders" onclick="switchTab('orders')" role="tab" aria-selected="false"
-          class="min-h-[44px] px-2 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-200 hover:text-white">
-          <span>Orders</span>
-          <span id="badge-orders-tab" class="px-1.5 py-0.5 text-[11px] rounded-full bg-white/15 text-white">0</span>
-        </button>
-        <button id="tab-btn-manage" onclick="switchTab('manage')" role="tab" aria-selected="false"
-          class="min-h-[44px] px-2 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1 text-slate-200 hover:text-white">
-          <span>Manage</span>
-        </button>
-      </nav>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col">
+  <header class="bg-[#0B0B0C] text-white px-4 py-3 flex items-center justify-between gap-3">
+    <div class="font-extrabold tracking-wide text-base sm:text-lg">
+      <span class="text-[#C82333]">BARRACO'S</span> DAILY PURCHASING
     </div>
-    <!-- Accent Ribbon -->
-    <div class="h-1 w-full flex">
-      <div class="w-1/2 bg-[#C82333]"></div>
-      <div class="w-1/2 bg-[#16A34A]"></div>
-    </div>
+    <nav class="flex gap-1.5" role="tablist">
+      <button type="button" id="tab-btn-count" onclick="switchTab('count')" class="min-h-[44px] px-3.5 rounded-xl font-bold text-xs sm:text-sm bg-[#C82333] text-white">
+        Daily Count (<span id="badge-count-tab">0</span>)
+      </button>
+      <button type="button" id="tab-btn-orders" onclick="switchTab('orders')" class="min-h-[44px] px-3.5 rounded-xl font-bold text-xs sm:text-sm bg-white/10 text-white">
+        Orders (<span id="badge-orders-tab">0</span>)
+      </button>
+      <button type="button" id="tab-btn-manage" onclick="switchTab('manage')" class="min-h-[44px] px-3.5 rounded-xl font-bold text-xs sm:text-sm bg-white/10 text-white">
+        Manage
+      </button>
+    </nav>
   </header>
 
-  <!-- MAIN WORKSPACE -->
-  <main class="flex-1 min-h-0 overflow-hidden max-w-7xl w-full mx-auto flex flex-col">
-
-    <!-- ===================================================================== -->
-    <!-- TAB 1: DAILY COUNT (Left Rail = Locations, Right Pane = Stock Items)   -->
-    <!-- ===================================================================== -->
-    <section id="view-count" class="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
-
-      <!-- Mobile Horizontal Location Strip (< md) -->
-      <div class="md:hidden bg-white border-b border-slate-200 px-3 py-2 shrink-0">
-        <div id="mobile-location-pills" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5"></div>
-      </div>
-
-      <!-- Desktop / Tablet / Unfolded Foldable Left Rail (>= md) -->
-      <aside class="hidden md:flex md:w-72 lg:w-80 bg-white border-r border-slate-200 flex-col shrink-0 min-h-0">
-        <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-          <div>
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Stocking Locations</h2>
-            <p class="text-[11px] text-slate-400 mt-0.5">Tap a location to count</p>
-          </div>
-          <span id="desktop-total-flagged" class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#15803D]/10 text-[#15803D]">0 to order</span>
-        </div>
-        <div id="desktop-location-list" class="flex-1 overflow-y-auto p-2.5 space-y-1.5"></div>
-        <div class="p-3 border-t border-slate-200 bg-slate-50">
-          <button onclick="openResetModal()" class="w-full min-h-[46px] px-3 py-2 rounded-xl border-2 border-[#C82333] text-[#C82333] font-bold text-sm hover:bg-[#C82333] hover:text-white transition flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-            <span>Start New Count</span>
-          </button>
-        </div>
-      </aside>
-
-      <!-- Right Pane: Active Location Header + Search + Draggable Item List -->
-      <div class="flex-1 min-h-0 flex flex-col bg-slate-100">
-        <!-- Location Subheader & Controls -->
-        <div class="bg-white border-b border-slate-200 px-3 sm:px-5 py-2.5 shrink-0 flex flex-wrap items-center justify-between gap-2">
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <h1 id="active-location-title" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Walk-In Cooler</h1>
-              <span id="active-location-count-pill" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 items</span>
-            </div>
-            <p id="drag-hint-text" class="text-[11px] text-slate-500 mt-0.5">Drag <span class="font-bold">⋮⋮</span> handle to match shelf order</p>
-          </div>
-
-          <div class="flex items-center gap-2 w-full sm:w-auto">
-            <div class="relative flex-1 sm:w-56">
-              <input id="count-search-input" type="search" placeholder="Filter items in location..."
-                oninput="handleCountSearch(this.value)"
-                class="w-full min-h-[40px] pl-8 pr-7 py-1.5 text-sm bg-slate-100 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-[#C82333]" />
-              <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              <button id="clear-count-search" onclick="clearCountSearch()" class="hidden absolute right-2 top-2.5 text-slate-400 hover:text-slate-700 text-xs font-bold px-1">✕</button>
-            </div>
-
-            <button onclick="openResetModal()" class="md:hidden min-h-[40px] px-3 py-1.5 rounded-xl border border-[#C82333] text-[#C82333] font-bold text-xs shrink-0 active:bg-[#C82333] active:text-white">
-              New Count
-            </button>
-          </div>
-        </div>
-
-        <!-- Scrollable Item Checklist -->
-        <div id="items-scroll-container" class="flex-1 overflow-y-auto px-3 sm:px-5 py-3 space-y-2.5 pb-28 safe-bottom"></div>
-      </div>
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4">
+    <section id="view-count" class="space-y-4">
+      <div id="location-bar" class="flex gap-2 overflow-x-auto pb-1"></div>
+      <div id="count-items-list" class="space-y-2"></div>
     </section>
 
-    <!-- ===================================================================== -->
-    <!-- TAB 2: SUPPLIER ORDERS & ONE-TAP SMS CLIPBOARD COPY                   -->
-    <!-- ===================================================================== -->
-    <section id="view-orders" class="hidden flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
-      <!-- Left Rail: Suppliers with Flagged Items -->
-      <aside class="md:w-80 lg:w-96 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 max-h-[42vh] md:max-h-none min-h-0">
-        <div class="p-3.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-          <div>
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Suppliers to Order</h2>
-            <p class="text-[11px] text-slate-400 mt-0.5">Select a supplier to review &amp; copy</p>
-          </div>
-          <span id="suppliers-ready-badge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-[#C82333]/10 text-[#C82333]">0 suppliers</span>
-        </div>
-        <div id="supplier-order-list" class="flex-1 overflow-y-auto p-2.5 space-y-2"></div>
-      </aside>
-
-      <!-- Right Pane: Selected Supplier Order Detail + Copy Button -->
-      <div id="supplier-order-detail" class="flex-1 min-h-0 overflow-y-auto bg-slate-100 p-3 sm:p-6 pb-28 safe-bottom"></div>
+    <section id="view-orders" class="hidden space-y-4">
+      <div id="orders-container" class="space-y-3"></div>
     </section>
 
-    <!-- ===================================================================== -->
-    <!-- TAB 3: MANAGE MASTER DATA (Items, Locations, Suppliers, CSV Backup)   -->
-    <!-- ===================================================================== -->
-    <section id="view-manage" class="hidden flex-1 min-h-0 overflow-y-auto bg-slate-100 p-3 sm:p-6 pb-28 safe-bottom">
-      <div class="max-w-5xl mx-auto space-y-5">
-
-        <!-- CSV Bulk Upload & Export Backup Card -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h2 class="text-base font-extrabold text-slate-900">Master Data CSV Backup &amp; Bulk Upload</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Columns: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[11px]">Item Name, Stocking Location, Supplier, Unit</code>. Upload overwrites master data.</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2.5">
-              <button onclick="exportCSV()" class="min-h-[44px] px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs sm:text-sm hover:bg-slate-800 transition flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                <span>Export CSV Backup</span>
-              </button>
-              <label class="min-h-[44px] px-4 py-2 rounded-xl bg-[#C82333] text-white font-bold text-xs sm:text-sm hover:bg-[#A31B28] transition flex items-center gap-2 cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                <span>Upload CSV (Overwrite)</span>
-                <input id="csv-file-input" type="file" accept=".csv,text/csv" class="hidden" onchange="handleCSVFileSelect(event)" />
-              </label>
-            </div>
-          </div>
+    <section id="view-manage" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-extrabold text-base">Master Stock List</h2>
+          <p class="text-xs text-slate-500">Add items, locations, or suppliers, or export/import CSV.</p>
         </div>
-
-        <!-- Sub-navigation for Master Items / Locations / Suppliers -->
-        <div class="grid grid-cols-3 gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
-          <button id="manage-sub-items" onclick="switchManageSub('items')" class="min-h-[44px] rounded-xl font-bold text-xs sm:text-sm bg-[#0B0B0C] text-white transition">
-            Items (<span id="manage-count-items">0</span>)
-          </button>
-          <button id="manage-sub-locations" onclick="switchManageSub('locations')" class="min-h-[44px] rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition">
-            Locations (<span id="manage-count-locations">0</span>)
-          </button>
-          <button id="manage-sub-suppliers" onclick="switchManageSub('suppliers')" class="min-h-[44px] rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition">
-            Suppliers (<span id="manage-count-suppliers">0</span>)
-          </button>
-        </div>
-
-        <!-- Manage Sub-Panel Container -->
-        <div id="manage-panel-content"></div>
-
+        <button type="button" onclick="exportCSV()" class="min-h-[44px] px-4 rounded-xl bg-slate-900 text-white font-bold text-xs sm:text-sm">
+          Export CSV
+        </button>
       </div>
+      <div id="manage-items-list" class="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100"></div>
     </section>
-
   </main>
 
-  <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
-    <div id="toast-inner" class="bg-[#0B0B0C] text-white text-xs sm:text-sm font-bold px-4 py-3 rounded-xl shadow-xl border border-white/15 flex items-center gap-2 whitespace-nowrap"></div>
-  </div>
-
-  <!-- MODAL CONTAINER (Reset Confirmation, CSV Overwrite Confirmation, Reassign Delete, Manual SMS Copy Fallback) -->
-  <div id="modal-backdrop" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div id="modal-box" class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-4"></div>
-  </div>
-
   <script>
-    // =========================================================================
-    // 1. SAFE STORAGE & DEFAULT BARRACO'S 60-ITEM RESTAURANT CATALOG
-    // =========================================================================
-    const STORAGE_KEY = 'barracos_purchasing_v1';
-
-    const memoryFallback = {};
-    const safeStorage = {
-      get(key) {
-        try {
-          return window.localStorage.getItem(key);
-        } catch (e) {
-          return memoryFallback[key] || null;
-        }
-      },
-      set(key, val) {
-        try {
-          window.localStorage.setItem(key, val);
-        } catch (e) {
-          memoryFallback[key] = val;
-        }
-      }
-    };
+    const STORAGE_KEY = "barracos_purchasing_v3";
 
     const DEFAULT_ITEMS = [
-      // Walk-In Cooler
       { name: "Whole Milk Mozzarella Loaf", location: "Walk-In Cooler", supplier: "Grande Cheese / Greco", unit: "Case" },
       { name: "Fresh Mozzarella Ciliegine", location: "Walk-In Cooler", supplier: "Grande Cheese / Greco", unit: "Tub" },
       { name: "Shredded Provolone Cheese", location: "Walk-In Cooler", supplier: "Grande Cheese / Greco", unit: "Bag" },
-      { name: "Grated Romano & Parmesan Blend", location: "Walk-In Cooler", supplier: "Grande Cheese / Greco", unit: "Tub" },
-      { name: "Ricotta Cheese (Whole Milk)", location: "Walk-In Cooler", supplier: "Grande Cheese / Greco", unit: "Tub" },
-      { name: "Heavy Whipping Cream (40%)", location: "Walk-In Cooler", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Unsalted Butter Solids", location: "Walk-In Cooler", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Large Grade AA Eggs", location: "Walk-In Cooler", supplier: "Sysco Chicago", unit: "Case" },
       { name: "Sliced Pepperoni (Cup & Char)", location: "Walk-In Cooler", supplier: "Fontanini / Hormel", unit: "Case" },
       { name: "Italian Beef Roasts (Seasoned)", location: "Walk-In Cooler", supplier: "Vienna Beef / Scala", unit: "Case" },
-      { name: "Natural Au Jus Beef Gravy Base", location: "Walk-In Cooler", supplier: "Vienna Beef / Scala", unit: "Tub" },
-      { name: "Bulk Mild Italian Sausage", location: "Walk-In Cooler", supplier: "Fontanini / Hormel", unit: "Case" },
-      { name: "Italian Sausage Links (4 oz)", location: "Walk-In Cooler", supplier: "Fontanini / Hormel", unit: "Case" },
-      { name: "Prosciutto di Parma (Sliced)", location: "Walk-In Cooler", supplier: "Grande Cheese / Greco", unit: "Pack" },
-      { name: "Genoa Salami & Capicola", location: "Walk-In Cooler", supplier: "Grande Cheese / Greco", unit: "Pack" },
-
-      // Pizza Make Line
       { name: "Crushed San Marzano Tomatoes", location: "Pizza Make Line", supplier: "Greco & Sons", unit: "Case" },
-      { name: "House Pizza Sauce (6/10 Cans)", location: "Pizza Make Line", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Fresh Sliced Mushrooms", location: "Pizza Make Line", supplier: " Testa Produce", unit: "Case" },
-      { name: "Green Bell Peppers", location: "Pizza Make Line", supplier: "Testa Produce", unit: "Case" },
-      { name: "Jumbo Yellow Onions", location: "Pizza Make Line", supplier: "Testa Produce", unit: "Bag" },
-      { name: "Red Onions", location: "Pizza Make Line", supplier: "Testa Produce", unit: "Bag" },
-      { name: "Vine-Ripe Plum Tomatoes", location: "Pizza Make Line", supplier: "Testa Produce", unit: "Case" },
-      { name: "Fresh Basil Bunches", location: "Pizza Make Line", supplier: "Testa Produce", unit: "Bunch" },
-      { name: "Baby Spinach", location: "Pizza Make Line", supplier: "Testa Produce", unit: "Case" },
-      { name: "Romaine Lettuce Hearts", location: "Pizza Make Line", supplier: "Testa Produce", unit: "Case" },
-      { name: "Hot Giardiniera (Gallon)", location: "Pizza Make Line", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Sliced Black & Green Olives", location: "Pizza Make Line", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Pepperoncini & Jalapeno Slices", location: "Pizza Make Line", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Marinated Artichoke Hearts", location: "Pizza Make Line", supplier: "Greco & Sons", unit: "Case" },
-
-      // Prep & Dough Cooler
+      { name: "Fresh Sliced Mushrooms", location: "Pizza Make Line", supplier: "Testa Produce", unit: "Case" },
       { name: "14-inch Thin Crust Dough Balls", location: "Prep & Dough Cooler", supplier: "Greco & Sons", unit: "Case" },
-      { name: "16-inch Thin Crust Dough Balls", location: "Prep & Dough Cooler", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Deep Dish & Sicilian Dough", location: "Prep & Dough Cooler", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Gluten-Free 12-inch Pizza Shells", location: "Prep & Dough Cooler", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Peeled Fresh Garlic Cloves", location: "Prep & Dough Cooler", supplier: "Testa Produce", unit: "Jar" },
-      { name: "House Italian & Ranch Dressings", location: "Prep & Dough Cooler", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Fresh Lemon Flats", location: "Prep & Dough Cooler", supplier: "Testa Produce", unit: "Case" },
-
-      // Walk-In Freezer
       { name: "Breaded Mozzarella Sticks", location: "Walk-In Freezer", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Breaded Mushrooms & Zucchini", location: "Walk-In Freezer", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Beer-Battered Onion Rings", location: "Walk-In Freezer", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Toasted Cheese Ravioli", location: "Walk-In Freezer", supplier: "Fontanini / Hormel", unit: "Case" },
-      { name: "Jumbo Chicken Wings (Unbreaded)", location: "Walk-In Freezer", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Breaded Chicken Tenders", location: "Walk-In Freezer", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Boneless Chicken Breasts (6 oz)", location: "Walk-In Freezer", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Cleaned Calamari Tubes & Tentacles", location: "Walk-In Freezer", supplier: "Supreme Lobster", unit: "Case" },
-      { name: "Jumbo Gulf Shrimp (16/20)", location: "Walk-In Freezer", supplier: "Supreme Lobster", unit: "Case" },
-      { name: "Fresh Lake Perch Fillets", location: "Walk-In Freezer", supplier: "Supreme Lobster", unit: "Case" },
-      { name: "Lobster Ravioli", location: "Walk-In Freezer", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Italian Meatballs (1 oz Cooked)", location: "Walk-In Freezer", supplier: "Fontanini / Hormel", unit: "Case" },
-
-      // Dry Storage
       { name: "Turano 8-inch French Rolls", location: "Dry Storage", supplier: "Turano Baking Co.", unit: "Case" },
-      { name: "Turano Garlic Bread Loaves", location: "Dry Storage", supplier: "Turano Baking Co.", unit: "Case" },
-      { name: "Mostaccioli & Penne Pasta", location: "Dry Storage", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Spaghetti & Fettuccine Pasta", location: "Dry Storage", supplier: "Greco & Sons", unit: "Case" },
-      { name: "Extra Virgin Olive Oil", location: "Dry Storage", supplier: "Greco & Sons", unit: "Tin" },
-      { name: "Clear Liquid Frying Shortening", location: "Dry Storage", supplier: "Sysco Chicago", unit: "Jib" },
-      { name: "14-inch & 16-inch Corrugated Pizza Boxes", location: "Dry Storage", supplier: "Sysco Chicago", unit: "Bundle" },
-
-      // Beverage & Dessert Cooler
       { name: "Homemade Tiramisu Trays", location: "Beverage & Dessert Cooler", supplier: "Greco & Sons", unit: "Tray" },
-      { name: "Cannoli Shells & Sweet Ricotta Fill", location: "Beverage & Dessert Cooler", supplier: "Greco & Sons", unit: "Case" },
-      { name: "New York Cheesecake (14-Cut)", location: "Beverage & Dessert Cooler", supplier: "Sysco Chicago", unit: "Case" },
-      { name: "Pepsi & Diet Pepsi 12 oz Cans", location: "Beverage & Dessert Cooler", supplier: "Pepsi Beverages", unit: "Case" },
-      { name: "2-Liter Soda Assortment", location: "Beverage & Dessert Cooler", supplier: "Pepsi Beverages", unit: "Case" }
-    ].map(item => ({
-      ...item,
-      location: item.location.trim(),
-      supplier: item.supplier.trim()
-    }));
+      { name: "Pepsi & Diet Pepsi 12 oz Cans", location: "Beverage & Dessert Cooler", supplier: "Pepsi Beverages", unit: "Case" }
+    ];
 
     function buildInitialState() {
       const locations = [];
       const suppliers = [];
-      const items = [];
-      DEFAULT_ITEMS.forEach((row, idx) => {
+      const items = DEFAULT_ITEMS.map((row, idx) => {
         if (!locations.includes(row.location)) locations.push(row.location);
         if (!suppliers.includes(row.supplier)) suppliers.push(row.supplier);
-        items.push({
-          id: 'item_' + (idx + 1) + '_' + Math.random().toString(36).slice(2, 6),
+        return {
+          id: "item_" + (idx + 1),
           name: row.name,
           location: row.location,
           supplier: row.supplier,
           unit: row.unit,
           qty: 0
-        });
+        };
       });
-      return {
-        items,
-        locations,
-        suppliers,
-        completedSuppliers: {},
-        activeLocation: locations[0] || '',
-        selectedSupplier: ''
-      };
+      return { items, locations, suppliers, activeLocation: locations[0] || "" };
     }
 
     function loadState() {
-      const raw = safeStorage.get(STORAGE_KEY);
-      if (!raw) return buildInitialState();
       try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (!raw) return buildInitialState();
         const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed.items) || !Array.isArray(parsed.locations) || !Array.isArray(parsed.suppliers)) {
-          return buildInitialState();
-        }
-        return {
-          items: parsed.items,
-          locations: parsed.locations,
-          suppliers: parsed.suppliers,
-          completedSuppliers: parsed.completedSuppliers || {},
-          activeLocation: parsed.locations.includes(parsed.activeLocation) ? parsed.activeLocation : (parsed.locations[0] || ''),
-          selectedSupplier: parsed.selectedSupplier || ''
-        };
-      } catch (e) {
+        if (!Array.isArray(parsed.items) || parsed.items.length === 0) return buildInitialState();
+        return parsed;
+      } catch (err) {
         return buildInitialState();
       }
     }
 
     let state = loadState();
-    let currentTab = 'count';
-    let countSearchQuery = '';
-    let manageSubTab = 'items';
-    let editingItemId = null;
 
     function saveState() {
-      safeStorage.set(STORAGE_KEY, JSON.stringify(state));
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {}
     }
 
-    // =========================================================================
-    // 2. NAVIGATION & GLOBAL BADGE UPDATES
-    // =========================================================================
     function switchTab(tab) {
-      currentTab = tab;
-      ['count', 'orders', 'manage'].forEach(t => {
-        const view = document.getElementById('view-' + t);
-        const btn = document.getElementById('tab-btn-' + t);
-        const active = t === tab;
-        view.classList.toggle('hidden', !active);
-        btn.setAttribute('aria-selected', active ? 'true' : 'false');
-        if (active) {
-          btn.className = 'min-h-[44px] px-2 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 bg-[#C82333] text-white shadow';
-        } else {
-          btn.className = 'min-h-[44px] px-2 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 text-slate-200 hover:text-white';
+      ["count", "orders", "manage"].forEach((t) => {
+        const view = document.getElementById("view-" + t);
+        const btn = document.getElementById("tab-btn-" + t);
+        const isActive = t === tab;
+        if (view) view.classList.toggle("hidden", !isActive);
+        if (btn) {
+          btn.className = isActive
+            ? "min-h-[44px] px-3.5 rounded-xl font-bold text-xs sm:text-sm bg-[#C82333] text-white"
+            : "min-h-[44px] px-3.5 rounded-xl font-bold text-xs sm:text-sm bg-white/10 text-white";
         }
       });
-
-      if (tab === 'count') renderCountView();
-      if (tab === 'orders') renderOrdersView();
-      if (tab === 'manage') renderManageView();
+      if (tab === "count") renderCountView();
+      if (tab === "orders") renderOrdersView();
+      if (tab === "manage") renderManageView();
     }
 
-    function updateGlobalBadges() {
-      const flaggedItems = state.items.filter(i => Number(i.qty) > 0);
-      const activeSuppliers = new Set(flaggedItems.map(i => i.supplier));
-
-      document.getElementById('badge-count-tab').textContent = flaggedItems.length;
-      document.getElementById('badge-orders-tab').textContent = activeSuppliers.size;
-      const mobileBadge = document.getElementById('header-badge-mobile');
-      if (mobileBadge) {
-        mobileBadge.textContent = flaggedItems.length + (flaggedItems.length === 1 ? ' item' : ' items');
-      }
-      const desktopBadge = document.getElementById('desktop-total-flagged');
-      if (desktopBadge) {
-        desktopBadge.textContent = flaggedItems.length + ' to order';
-      }
-    }
-
-    // =========================================================================
-    // 3. TAB 1: DAILY COUNT & TOUCH/POINTER DRAG-AND-DROP SHELF REORDERING
-    // =========================================================================
-    function selectLocation(loc) {
-      state.activeLocation = loc;
+    function stepQty(itemId, delta) {
+      const item = state.items.find((i) => i.id === itemId);
+      if (!item) return;
+      item.qty = Math.max(0, (Number(item.qty) || 0) + delta);
       saveState();
       renderCountView();
     }
 
-    function handleCountSearch(val) {
-      countSearchQuery = val;
-      document.getElementById('clear-count-search').classList.toggle('hidden', !val);
-      renderLocationItems();
-    }
-
-    function clearCountSearch() {
-      countSearchQuery = '';
-      const input = document.getElementById('count-search-input');
-      if (input) input.value = '';
-      document.getElementById('clear-count-search').classList.add('hidden');
-      renderLocationItems();
-    }
-
-    function updateItemQty(itemId, newQty) {
-      const item = state.items.find(i => i.id === itemId);
-      if (!item) return;
-      const clean = Math.max(0, Math.round((Number(newQty) || 0) * 100) / 100);
-      if (item.qty === clean) return;
-      item.qty = clean;
-
-      // Invalidate supplier completion badge if quantities changed after copying
-      if (state.completedSuppliers[item.supplier]) {
-        state.completedSuppliers[item.supplier] = 'modified';
-      }
-
-      saveState();
-      updateGlobalBadges();
-      renderLocationRailsOnly();
-      renderLocationItems();
-    }
-
-    function stepItemQty(itemId, delta) {
-      const item = state.items.find(i => i.id === itemId);
-      if (!item) return;
-      const next = Math.max(0, Math.round(((Number(item.qty) || 0) + delta) * 100) / 100);
-      updateItemQty(itemId, next);
-    }
-
-    function moveItemOrder(itemId, direction) {
-      if (countSearchQuery.trim()) return;
-      const loc = state.activeLocation;
-      const locIndices = [];
-      state.items.forEach((it, idx) => {
-        if (it.location === loc) locIndices.push(idx);
-      });
-      const posInLoc = locIndices.findIndex(idx => state.items[idx].id === itemId);
-      if (posInLoc === -1) return;
-      const targetPos = posInLoc + direction;
-      if (targetPos < 0 || targetPos >= locIndices.length) return;
-
-      const fromGlobal = locIndices[posInLoc];
-      const toGlobal = locIndices[targetPos];
-      const [moved] = state.items.splice(fromGlobal, 1);
-      state.items.splice(toGlobal, 0, moved);
-
-      saveState();
-      renderLocationItems();
-    }
-
-    function renderLocationRailsOnly() {
-      if (!state.locations.includes(state.activeLocation)) {
-        state.activeLocation = state.locations[0] || '';
-      }
-
-      const mobilePills = document.getElementById('mobile-location-pills');
-      const desktopList = document.getElementById('desktop-location-list');
-      mobilePills.innerHTML = '';
-      desktopList.innerHTML = '';
-
-      state.locations.forEach(loc => {
-        const locItems = state.items.filter(i => i.location === loc);
-        const flaggedCount = locItems.filter(i => Number(i.qty) > 0).length;
-        const isSelected = loc === state.activeLocation;
-
-        // Mobile pill
-        const pill = document.createElement('button');
-        pill.onclick = () => selectLocation(loc);
-        pill.className = isSelected
-          ? 'min-h-[42px] px-3.5 py-1.5 rounded-xl bg-[#C82333] text-white font-bold text-xs whitespace-nowrap flex items-center gap-1.5 shadow-xs shrink-0'
-          : 'min-h-[42px] px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs whitespace-nowrap flex items-center gap-1.5 hover:bg-slate-200 shrink-0';
-        pill.innerHTML = `
-          <span>${escapeHtml(loc)}</span>
-          ${flaggedCount > 0 ? `<span class="px-1.5 py-0.5 text-[10px] rounded-full ${isSelected ? 'bg-white text-[#C82333]' : 'bg-[#15803D] text-white'} font-extrabold">${flaggedCount}</span>` : ''}
-        `;
-        mobilePills.appendChild(pill);
-
-        // Desktop / Foldable left rail button
-        const row = document.createElement('button');
-        row.onclick = () => selectLocation(loc);
-        row.className = isSelected
-          ? 'w-full min-h-[52px] px-3.5 py-2.5 rounded-xl bg-[#C82333] text-white font-bold text-sm flex items-center justify-between gap-2 shadow-xs text-left transition'
-          : 'w-full min-h-[52px] px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-semibold text-sm flex items-center justify-between gap-2 border border-slate-200/80 text-left transition';
-        row.innerHTML = `
-          <div class="min-w-0">
-            <div class="truncate">${escapeHtml(loc)}</div>
-            <div class="text-[11px] ${isSelected ? 'text-white/80' : 'text-slate-400'} font-normal">${locItems.length} stock items</div>
-          </div>
-          ${flaggedCount > 0
-            ? `<span class="px-2.5 py-1 text-xs rounded-full font-extrabold shrink-0 ${isSelected ? 'bg-white text-[#C82333]' : 'bg-[#15803D] text-white'}">${flaggedCount}</span>`
-            : `<span class="text-xs ${isSelected ? 'text-white/60' : 'text-slate-300'} font-bold shrink-0">0</span>`
-          }
-        `;
-        desktopList.appendChild(row);
-      });
-    }
-
-    function renderLocationItems() {
-      const container = document.getElementById('items-scroll-container');
-      const titleEl = document.getElementById('active-location-title');
-      const pillEl = document.getElementById('active-location-count-pill');
-      const hintEl = document.getElementById('drag-hint-text');
-
-      if (!state.activeLocation) {
-        titleEl.textContent = 'No Stocking Locations';
-        pillEl.textContent = '0 items';
-        container.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-500 text-sm">Add a stocking location in the <strong>Manage</strong> tab to get started.</div>`;
-        return;
-      }
-
-      titleEl.textContent = state.activeLocation;
-      const query = countSearchQuery.trim().toLowerCase();
-      const allLocItems = state.items.filter(i => i.location === state.activeLocation);
-      const visibleItems = query
-        ? allLocItems.filter(i => i.name.toLowerCase().includes(query) || i.supplier.toLowerCase().includes(query))
-        : allLocItems;
-
-      pillEl.textContent = `${visibleItems.length} ${visibleItems.length === 1 ? 'item' : 'items'}`;
-      hintEl.innerHTML = query
-        ? `<span class="text-amber-600 font-semibold">Clear search filter to drag-and-drop reorder</span>`
-        : `Drag <span class="font-bold">⋮⋮</span> handle to reorder shelf sequence`;
-
-      if (visibleItems.length === 0) {
-        container.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-500 text-sm">No items match this location or filter.</div>`;
-        return;
-      }
-
-      container.innerHTML = '';
-      visibleItems.forEach((item, index) => {
-        const hasQty = Number(item.qty) > 0;
-        const card = document.createElement('div');
-        card.dataset.itemId = item.id;
-        card.className = `item-row-card rounded-2xl border transition-colors px-2.5 sm:px-3.5 py-2.5 flex items-center justify-between gap-2 shadow-2xs ${
-          hasQty
-            ? 'bg-emerald-50/70 border-[#15803D] ring-1 ring-[#15803D]/20'
-            : 'bg-white border-slate-200'
-        }`;
-
-        const dragHandleHtml = query
-          ? `<div class="w-8 h-11 flex items-center justify-center text-slate-200 shrink-0" title="Clear filter to reorder">⋮⋮</div>`
-          : `<button type="button" aria-label="Drag to reorder ${escapeHtml(item.name)}"
-               onpointerdown="startItemDrag(event, '${item.id}')"
-               class="drag-handle w-9 h-12 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:bg-slate-200 cursor-grab active:cursor-grabbing shrink-0">
-               <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
-                 <path d="M7 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm9-12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
-               </svg>
-             </button>`;
-
-        const upDownHtml = !query ? `
-          <div class="hidden lg:flex flex-col gap-0.5 shrink-0">
-            <button type="button" onclick="moveItemOrder('${item.id}', -1)" ${index === 0 ? 'disabled' : ''}
-              class="w-6 h-5 rounded text-[10px] flex items-center justify-center ${index === 0 ? 'text-slate-200' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'}" title="Move up">▲</button>
-            <button type="button" onclick="moveItemOrder('${item.id}', 1)" ${index === visibleItems.length - 1 ? 'disabled' : ''}
-              class="w-6 h-5 rounded text-[10px] flex items-center justify-center ${index === visibleItems.length - 1 ? 'text-slate-200' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'}" title="Move down">▼</button>
-          </div>` : '';
-
-        card.innerHTML = `
-          <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-            ${dragHandleHtml}
-            ${upDownHtml}
-            <div class="min-w-0 flex-1">
-              <div class="font-bold text-sm sm:text-base text-slate-900 leading-snug break-words">${escapeHtml(item.name)}</div>
-              <div class="flex flex-wrap items-center gap-1.5 mt-0.5 text-xs text-slate-500">
-                <span class="font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">${escapeHtml(item.unit)}</span>
-                <span class="truncate">• ${escapeHtml(item.supplier)}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Large Touch-Friendly Quantity Stepper -->
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="stepItemQty('${item.id}', -1)" aria-label="Decrease quantity"
-              class="w-12 h-12 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-800 font-extrabold text-xl flex items-center justify-center transition">
-              −
-            </button>
-            <input type="number" inputmode="decimal" step="any" min="0"
-              value="${item.qty > 0 ? item.qty : ''}" placeholder="0"
-              aria-label="Reorder quantity for ${escapeHtml(item.name)}"
-              onchange="updateItemQty('${item.id}', this.value)"
-              onfocus="this.select()"
-              class="w-14 sm:w-16 h-12 text-center font-extrabold text-base sm:text-lg rounded-xl border ${
-                hasQty ? 'border-[#15803D] bg-white text-[#15803D]' : 'border-slate-300 bg-white text-slate-900'
-              } focus:outline-none focus:ring-2 focus:ring-[#C82333]" />
-            <button type="button" onclick="stepItemQty('${item.id}', 1)" aria-label="Increase quantity"
-              class="w-12 h-12 rounded-xl ${
-                hasQty ? 'bg-[#15803D] hover:bg-[#16A34A] text-white' : 'bg-[#0B0B0C] hover:bg-slate-800 text-white'
-              } font-extrabold text-xl flex items-center justify-center transition shadow-2xs">
-              +
-            </button>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
     function renderCountView() {
-      updateGlobalBadges();
-      renderLocationRailsOnly();
-      renderLocationItems();
-    }
+      const flagged = state.items.filter((i) => Number(i.qty) > 0);
+      const suppliersCount = new Set(flagged.map((i) => i.supplier)).size;
+      document.getElementById("badge-count-tab").textContent = flagged.length;
+      document.getElementById("badge-orders-tab").textContent = suppliersCount;
 
-    // Pointer / Touch Drag-and-Drop Engine with Auto-Scroll
-    let dragState = null;
-
-    function startItemDrag(e, itemId) {
-      if (countSearchQuery.trim()) return;
-      if (e.button !== undefined && e.button !== 0) return;
-      e.preventDefault();
-
-      const scrollContainer = document.getElementById('items-scroll-container');
-      const cards = Array.from(scrollContainer.querySelectorAll('.item-row-card'));
-      const sourceCard = cards.find(c => c.dataset.itemId === itemId);
-      if (!sourceCard) return;
-
-      const rect = sourceCard.getBoundingClientRect();
-      const ghost = sourceCard.cloneNode(true);
-      ghost.style.position = 'fixed';
-      ghost.style.left = rect.left + 'px';
-      ghost.style.top = rect.top + 'px';
-      ghost.style.width = rect.width + 'px';
-      ghost.style.zIndex = '9999';
-      ghost.style.pointerEvents = 'none';
-      ghost.style.boxShadow = '0 18px 36px rgba(0,0,0,0.22)';
-      ghost.style.border = '2px solid #C82333';
-      ghost.style.transform = 'scale(1.02)';
-      ghost.style.backgroundColor = '#FFFFFF';
-      document.body.appendChild(ghost);
-
-      sourceCard.classList.add('item-card-dragging');
-
-      dragState = {
-        itemId,
-        pointerId: e.pointerId,
-        offsetY: e.clientY - rect.top,
-        lastClientY: e.clientY,
-        ghost,
-        sourceCard,
-        scrollContainer,
-        rafId: null
-      };
-
-      const autoScrollLoop = () => {
-        if (!dragState) return;
-        const box = dragState.scrollContainer.getBoundingClientRect();
-        const y = dragState.lastClientY;
-        const edgeThreshold = 68;
-        if (y < box.top + edgeThreshold) {
-          const intensity = Math.max(2, Math.round(((box.top + edgeThreshold) - y) / 5));
-          dragState.scrollContainer.scrollTop -= intensity;
-          updateDragPlaceholder(y);
-        } else if (y > box.bottom - edgeThreshold) {
-          const intensity = Math.max(2, Math.round((y - (box.bottom - edgeThreshold)) / 5));
-          dragState.scrollContainer.scrollTop += intensity;
-          updateDragPlaceholder(y);
-        }
-        dragState.rafId = requestAnimationFrame(autoScrollLoop);
-      };
-      dragState.rafId = requestAnimationFrame(autoScrollLoop);
-
-      window.addEventListener('pointermove', onItemDragMove, { passive: false });
-      window.addEventListener('pointerup', onItemDragEnd);
-      window.addEventListener('pointercancel', onItemDragEnd);
-    }
-
-    function updateDragPlaceholder(clientY) {
-      if (!dragState) return;
-      const { scrollContainer, sourceCard } = dragState;
-      const siblings = Array.from(scrollContainer.querySelectorAll('.item-row-card')).filter(c => c !== sourceCard);
-
-      let insertBeforeEl = null;
-      for (const sib of siblings) {
-        const r = sib.getBoundingClientRect();
-        const midY = r.top + r.height / 2;
-        if (clientY < midY) {
-          insertBeforeEl = sib;
-          break;
-        }
-      }
-      if (insertBeforeEl) {
-        scrollContainer.insertBefore(sourceCard, insertBeforeEl);
-      } else {
-        scrollContainer.appendChild(sourceCard);
-      }
-    }
-
-    function onItemDragMove(e) {
-      if (!dragState || e.pointerId !== dragState.pointerId) return;
-      e.preventDefault();
-      dragState.lastClientY = e.clientY;
-      dragState.ghost.style.top = (e.clientY - dragState.offsetY) + 'px';
-      updateDragPlaceholder(e.clientY);
-    }
-
-    function onItemDragEnd(e) {
-      if (!dragState || e.pointerId !== dragState.pointerId) return;
-      if (dragState.rafId) cancelAnimationFrame(dragState.rafId);
-
-      window.removeEventListener('pointermove', onItemDragMove);
-      window.removeEventListener('pointerup', onItemDragEnd);
-      window.removeEventListener('pointercancel', onItemDragEnd);
-
-      dragState.ghost.remove();
-      dragState.sourceCard.classList.remove('item-card-dragging');
-
-      // Read new visual sequence of IDs within active location and persist to state.items
-      const orderedIds = Array.from(dragState.scrollContainer.querySelectorAll('.item-row-card')).map(el => el.dataset.itemId);
-      const loc = state.activeLocation;
-      const itemMap = new Map(state.items.map(it => [it.id, it]));
-      const reorderedLocItems = orderedIds.map(id => itemMap.get(id)).filter(Boolean);
-
-      let pointer = 0;
-      state.items = state.items.map(it => {
-        if (it.location === loc && pointer < reorderedLocItems.length) {
-          return reorderedLocItems[pointer++];
-        }
-        return it;
+      const locBar = document.getElementById("location-bar");
+      locBar.innerHTML = "";
+      state.locations.forEach((loc) => {
+        const active = loc === state.activeLocation;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = loc;
+        btn.className = active
+          ? "min-h-[40px] px-3.5 rounded-xl text-xs font-bold bg-[#0B0B0C] text-white shrink-0"
+          : "min-h-[40px] px-3.5 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 shrink-0";
+        btn.onclick = () => {
+          state.activeLocation = loc;
+          saveState();
+          renderCountView();
+        };
+        locBar.appendChild(btn);
       });
 
-      dragState = null;
-      saveState();
-      renderLocationItems();
-      showToast('Shelf order saved');
-    }
-
-    // =========================================================================
-    // 4. TAB 2: SUPPLIER ORDER SUMMARY & ONE-TAP SMS CLIPBOARD COPY
-    // =========================================================================
-    function getGroupedSupplierOrders() {
-      const map = new Map();
-      state.items.forEach(item => {
-        if (Number(item.qty) > 0) {
-          if (!map.has(item.supplier)) map.set(item.supplier, []);
-          map.get(item.supplier).push(item);
-        }
-      });
-      return map;
-    }
-
-    function formatSupplierPlainText(items) {
-      return items.map(it => `${it.qty} ${it.unit} - ${it.name}`).join('
-');
+      const list = document.getElementById("count-items-list");
+      list.innerHTML = "";
+      state.items
+        .filter((i) => i.location === state.activeLocation)
+        .forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "bg-white rounded-2xl border border-slate-200 p-3.5 flex items-center justify-between gap-3";
+          row.innerHTML =
+            "<div><div class='font-bold text-sm'>" +
+            item.name +
+            "</div><div class='text-xs text-slate-500'>" +
+            item.unit +
+            " • " +
+            item.supplier +
+            "</div></div>" +
+            "<div class='flex items-center gap-2'>" +
+            "<button type='button' onclick=\"stepQty('" + item.id + "', -1)\" class='w-11 h-11 rounded-xl border border-slate-300 font-extrabold text-lg'>−</button>" +
+            "<span class='w-8 text-center font-extrabold'>" + item.qty + "</span>" +
+            "<button type='button' onclick=\"stepQty('" + item.id + "', 1)\" class='w-11 h-11 rounded-xl bg-[#15803D] text-white font-extrabold text-lg'>+</button>" +
+            "</div>";
+          list.appendChild(row);
+        });
     }
 
     function renderOrdersView() {
-      updateGlobalBadges();
-      const grouped = getGroupedSupplierOrders();
-      const supplierNames = Array.from(grouped.keys());
-
-      document.getElementById('suppliers-ready-badge').textContent =
-        `${supplierNames.length} ${supplierNames.length === 1 ? 'supplier' : 'suppliers'}`;
-
-      const listEl = document.getElementById('supplier-order-list');
-      const detailEl = document.getElementById('supplier-order-detail');
-      listEl.innerHTML = '';
-
-      if (supplierNames.length === 0) {
-        state.selectedSupplier = '';
-        listEl.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No items marked for reorder yet.</div>`;
-        detailEl.innerHTML = `
-          <div class="max-w-lg mx-auto bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-3 mt-4">
-            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-xl font-bold">0</div>
-            <h3 class="text-base font-extrabold text-slate-900">Your Daily Order List Is Empty</h3>
-            <p class="text-sm text-slate-500">Walk through your stocking locations in <strong>Daily Count</strong> and tap <strong>+</strong> on any item that needs to be reordered.</p>
-            <button onclick="switchTab('count')" class="min-h-[44px] px-5 py-2.5 rounded-xl bg-[#C82333] text-white font-bold text-sm">Go to Daily Count</button>
-          </div>
-        `;
+      const container = document.getElementById("orders-container");
+      const flagged = state.items.filter((i) => Number(i.qty) > 0);
+      if (flagged.length === 0) {
+        container.innerHTML = "<div class='bg-white rounded-2xl border border-slate-200 p-6 text-center text-sm text-slate-500'>No items with reorder quantity &gt; 0 yet.</div>";
         return;
       }
-
-      if (!supplierNames.includes(state.selectedSupplier)) {
-        state.selectedSupplier = supplierNames[0];
-      }
-
-      supplierNames.forEach(sup => {
-        const supItems = grouped.get(sup);
-        const status = state.completedSuppliers[sup]; // true | 'modified' | undefined
-        const isSelected = sup === state.selectedSupplier;
-
-        let statusBadge = '';
-        if (status === true) {
-          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#15803D] text-white flex items-center gap-1">✓ Copied</span>`;
-        } else if (status === 'modified') {
-          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800">Updated • Re-copy</span>`;
-        }
-
-        const btn = document.createElement('button');
-        btn.onclick = () => {
-          state.selectedSupplier = sup;
-          saveState();
-          renderOrdersView();
-        };
-        btn.className = isSelected
-          ? 'w-full min-h-[56px] p-3.5 rounded-xl bg-[#0B0B0C] text-white text-left flex items-center justify-between gap-2 shadow-sm transition'
-          : 'w-full min-h-[56px] p-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 text-left flex items-center justify-between gap-2 transition';
-        btn.innerHTML = `
-          <div class="min-w-0">
-            <div class="font-extrabold text-sm truncate">${escapeHtml(sup)}</div>
-            <div class="text-xs ${isSelected ? 'text-slate-300' : 'text-slate-500'} mt-0.5">${supItems.length} ${supItems.length === 1 ? 'item' : 'items'} to order</div>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            ${statusBadge}
-            <span class="text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-400'}">›</span>
-          </div>
-        `;
-        listEl.appendChild(btn);
+      const groups = {};
+      flagged.forEach((it) => {
+        if (!groups[it.supplier]) groups[it.supplier] = [];
+        groups[it.supplier].push(it);
       });
-
-      // Render Selected Supplier Order Card
-      const activeSup = state.selectedSupplier;
-      const orderItems = grouped.get(activeSup) || [];
-      const plainText = formatSupplierPlainText(orderItems);
-      const isDone = state.completedSuppliers[activeSup] === true;
-      const isModified = state.completedSuppliers[activeSup] === 'modified';
-
-      detailEl.innerHTML = `
-        <div class="max-w-2xl mx-auto space-y-4">
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50">
-              <div>
-                <div class="flex items-center gap-2">
-                  <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">${escapeHtml(activeSup)}</h2>
-                  ${isDone ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-[#15803D] text-white">✓ Copied / Done</span>` : ''}
-                  ${isModified ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">Updated • Re-copy</span>` : ''}
-                </div>
-                <p class="text-xs text-slate-500 mt-0.5">${orderItems.length} ${orderItems.length === 1 ? 'line item' : 'line items'} ready for SMS text message</p>
-              </div>
-
-              <button onclick="copySupplierOrder('${escapeJs(activeSup)}')"
-                class="w-full sm:w-auto min-h-[50px] px-5 py-2.5 rounded-xl ${
-                  isDone ? 'bg-[#15803D] hover:bg-[#16A34A]' : 'bg-[#C82333] hover:bg-[#A31B28]'
-                } text-white font-extrabold text-sm shadow transition flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                <span>${isDone ? 'Copied! Copy Again' : 'Copy Order to Clipboard'}</span>
-              </button>
-            </div>
-
-            <!-- Itemized Breakdown -->
-            <div class="divide-y divide-slate-100">
-              ${orderItems.map(it => `
-                <div class="px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
-                  <div class="min-w-0">
-                    <div class="font-bold text-sm text-slate-900">${escapeHtml(it.name)}</div>
-                    <div class="text-xs text-slate-400">Stocked in: ${escapeHtml(it.location)}</div>
-                  </div>
-                  <div class="shrink-0 font-extrabold text-sm px-3 py-1 rounded-lg bg-emerald-50 text-[#15803D] border border-[#15803D]/20">
-                    ${it.qty} ${escapeHtml(it.unit)}
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-
-            <!-- SMS Plain-Text Preview -->
-            <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">SMS Text Preview</span>
-                <button onclick="toggleSupplierComplete('${escapeJs(activeSup)}')" class="text-xs font-bold text-slate-600 underline">
-                  ${isDone ? 'Unmark complete' : 'Mark complete manually'}
-                </button>
-              </div>
-              <pre class="bg-white border border-slate-200 rounded-xl p-3.5 text-xs sm:text-sm font-mono text-slate-800 whitespace-pre-wrap select-all">${escapeHtml(plainText)}</pre>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    async function copySupplierOrder(supplierName) {
-      const grouped = getGroupedSupplierOrders();
-      const items = grouped.get(supplierName) || [];
-      if (items.length === 0) return;
-
-      const text = formatSupplierPlainText(items);
-      let copied = false;
-
-      if (navigator.clipboard && window.isSecureContext) {
-        try {
-          await navigator.clipboard.writeText(text);
-          copied = true;
-        } catch (e) {
-          copied = false;
-        }
-      }
-
-      if (!copied) {
-        try {
-          const ta = document.createElement('textarea');
-          ta.value = text;
-          ta.setAttribute('readonly', '');
-          ta.style.position = 'fixed';
-          ta.style.top = '0';
-          ta.style.left = '-9999px';
-          document.body.appendChild(ta);
-          ta.focus();
-          ta.select();
-          ta.setSelectionRange(0, ta.value.length);
-          copied = document.execCommand('copy');
-          document.body.removeChild(ta);
-        } catch (e) {
-          copied = false;
-        }
-      }
-
-      // Mark supplier complete visually per specification
-      state.completedSuppliers[supplierName] = true;
-      saveState();
-      renderOrdersView();
-
-      if (copied) {
-        showToast(`Copied ${supplierName} order to clipboard`);
-      } else {
-        openManualCopyModal(supplierName, text);
-      }
-    }
-
-    function toggleSupplierComplete(supplierName) {
-      if (state.completedSuppliers[supplierName] === true) {
-        delete state.completedSuppliers[supplierName];
-      } else {
-        state.completedSuppliers[supplierName] = true;
-      }
-      saveState();
-      renderOrdersView();
-    }
-
-    // =========================================================================
-    // 5. START NEW COUNT RESET CONFIRMATION
-    // =========================================================================
-    function openResetModal() {
-      const flaggedCount = state.items.filter(i => Number(i.qty) > 0).length;
-      openModal(`
-        <div class="space-y-3">
-          <div class="w-11 h-11 rounded-full bg-[#C82333]/10 text-[#C82333] flex items-center justify-center font-extrabold text-xl">↺</div>
-          <h3 class="text-lg font-extrabold text-slate-900">Start New Daily Count?</h3>
-          <p class="text-sm text-slate-600">
-            This will reset all reorder quantities (${flaggedCount} active ${flaggedCount === 1 ? 'item' : 'items'}) back to <strong>0</strong> and clear supplier completion checkmarks. Your master items, locations, and suppliers stay intact.
-          </p>
-          <div class="flex items-center justify-end gap-2.5 pt-2">
-            <button onclick="closeModal()" class="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 font-bold text-sm text-slate-700 hover:bg-slate-50">Cancel</button>
-            <button onclick="confirmResetDailyCount()" class="min-h-[44px] px-4 py-2 rounded-xl bg-[#C82333] text-white font-bold text-sm hover:bg-[#A31B28]">Reset All to 0</button>
-          </div>
-        </div>
-      `);
-    }
-
-    function confirmResetDailyCount() {
-      state.items.forEach(it => { it.qty = 0; });
-      state.completedSuppliers = {};
-      saveState();
-      closeModal();
-      if (currentTab === 'count') renderCountView();
-      if (currentTab === 'orders') renderOrdersView();
-      updateGlobalBadges();
-      showToast('All reorder quantities reset to 0');
-    }
-
-    // =========================================================================
-    // 6. TAB 3: MANAGE ITEMS, LOCATIONS, SUPPLIERS & CSV IMPORT/EXPORT
-    // =========================================================================
-    function switchManageSub(sub) {
-      manageSubTab = sub;
-      editingItemId = null;
-      ['items', 'locations', 'suppliers'].forEach(s => {
-        const btn = document.getElementById('manage-sub-' + s);
-        btn.className = s === sub
-          ? 'min-h-[44px] rounded-xl font-bold text-xs sm:text-sm bg-[#0B0B0C] text-white transition'
-          : 'min-h-[44px] rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:bg-slate-100 transition';
-      });
-      renderManageView();
+      container.innerHTML = Object.keys(groups)
+        .map((sup) => {
+          const lines = groups[sup].map((i) => i.qty + " " + i.unit + " - " + i.name).join("\n");
+          return "<div class='bg-white rounded-2xl border border-slate-200 p-4 space-y-2'><div class='font-extrabold text-base'>" + sup + "</div><pre class='bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono whitespace-pre-wrap'>" + lines + "</pre></div>";
+        })
+        .join("");
     }
 
     function renderManageView() {
-      updateGlobalBadges();
-      document.getElementById('manage-count-items').textContent = state.items.length;
-      document.getElementById('manage-count-locations').textContent = state.locations.length;
-      document.getElementById('manage-count-suppliers').textContent = state.suppliers.length;
-
-      const panel = document.getElementById('manage-panel-content');
-      if (manageSubTab === 'items') {
-        renderManageItems(panel);
-      } else if (manageSubTab === 'locations') {
-        renderManageEntities(panel, 'location');
-      } else {
-        renderManageEntities(panel, 'supplier');
-      }
-    }
-
-    function renderManageItems(panel) {
-      const locOptions = state.locations.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
-      const supOptions = state.suppliers.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
-
-      panel.innerHTML = `
-        <div class="space-y-4">
-          <!-- Add New Item Form -->
-          <form onsubmit="handleAddItem(event)" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3">
-            <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-500">Add New Master Item</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-              <input id="new-item-name" type="text" required placeholder="Item Name (e.g. Fresh Basil)"
-                class="lg:col-span-2 min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#C82333]" />
-              <select id="new-item-loc" required class="min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:border-[#C82333]">
-                ${locOptions}
-              </select>
-              <select id="new-item-sup" required class="min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:border-[#C82333]">
-                ${supOptions}
-              </select>
-              <input id="new-item-unit" type="text" required placeholder="Unit (Case, Bag, Tub)"
-                class="min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#C82333]" />
-            </div>
-            <div class="flex justify-end">
-              <button type="submit" class="min-h-[44px] px-5 py-2 rounded-xl bg-[#15803D] hover:bg-[#16A34A] text-white font-bold text-sm transition">
-                + Add Stock Item
-              </button>
-            </div>
-          </form>
-
-          <!-- Master Item List -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm divide-y divide-slate-100">
-            ${state.items.map(it => {
-              if (editingItemId === it.id) {
-                return `
-                  <form onsubmit="handleSaveEditItem(event, '${it.id}')" class="p-4 bg-amber-50/60 space-y-2.5">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-                      <input id="edit-name-${it.id}" type="text" required value="${escapeHtml(it.name)}"
-                        class="lg:col-span-2 min-h-[42px] px-3 rounded-xl border border-slate-300 text-sm bg-white" />
-                      <select id="edit-loc-${it.id}" class="min-h-[42px] px-3 rounded-xl border border-slate-300 text-sm bg-white">
-                        ${state.locations.map(l => `<option value="${escapeHtml(l)}" ${l === it.location ? 'selected' : ''}>${escapeHtml(l)}</option>`).join('')}
-                      </select>
-                      <select id="edit-sup-${it.id}" class="min-h-[42px] px-3 rounded-xl border border-slate-300 text-sm bg-white">
-                        ${state.suppliers.map(s => `<option value="${escapeHtml(s)}" ${s === it.supplier ? 'selected' : ''}>${escapeHtml(s)}</option>`).join('')}
-                      </select>
-                      <input id="edit-unit-${it.id}" type="text" required value="${escapeHtml(it.unit)}"
-                        class="min-h-[42px] px-3 rounded-xl border border-slate-300 text-sm bg-white" />
-                    </div>
-                    <div class="flex justify-end gap-2">
-                      <button type="button" onclick="editingItemId=null; renderManageView();" class="min-h-[40px] px-3 rounded-xl border border-slate-300 text-xs font-bold bg-white">Cancel</button>
-                      <button type="submit" class="min-h-[40px] px-4 rounded-xl bg-[#15803D] text-white text-xs font-bold">Save Changes</button>
-                    </div>
-                  </form>
-                `;
-              }
-              return `
-                <div class="p-3.5 sm:px-5 flex items-center justify-between gap-3">
-                  <div class="min-w-0">
-                    <div class="font-bold text-sm text-slate-900 truncate">${escapeHtml(it.name)}</div>
-                    <div class="text-xs text-slate-500 mt-0.5">
-                      <span class="font-semibold text-slate-700">${escapeHtml(it.location)}</span> • ${escapeHtml(it.supplier)} • <span class="font-mono">${escapeHtml(it.unit)}</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-1.5 shrink-0">
-                    <button onclick="editingItemId='${it.id}'; renderManageView();" class="min-h-[40px] px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700">Edit</button>
-                    <button onclick="deleteMasterItem('${it.id}')" class="min-h-[40px] px-3 rounded-xl border border-red-200 hover:bg-red-50 text-xs font-bold text-[#C82333]">Delete</button>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    function handleAddItem(e) {
-      e.preventDefault();
-      const name = document.getElementById('new-item-name').value.trim();
-      const location = document.getElementById('new-item-loc').value.trim();
-      const supplier = document.getElementById('new-item-sup').value.trim();
-      const unit = document.getElementById('new-item-unit').value.trim();
-
-      if (!name || !location || !supplier || !unit) return;
-      const duplicate = state.items.some(it => it.name.toLowerCase() === name.toLowerCase());
-      if (duplicate) {
-        showToast('Item already exists in master list');
-        return;
-      }
-
-      state.items.push({
-        id: 'item_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
-        name,
-        location,
-        supplier,
-        unit,
-        qty: 0
-      });
-      saveState();
-      renderManageView();
-      showToast('Added ' + name);
-    }
-
-    function handleSaveEditItem(e, itemId) {
-      e.preventDefault();
-      const item = state.items.find(i => i.id === itemId);
-      if (!item) return;
-
-      const name = document.getElementById('edit-name-' + itemId).value.trim();
-      const location = document.getElementById('edit-loc-' + itemId).value.trim();
-      const supplier = document.getElementById('edit-sup-' + itemId).value.trim();
-      const unit = document.getElementById('edit-unit-' + itemId).value.trim();
-
-      const duplicate = state.items.some(it => it.id !== itemId && it.name.toLowerCase() === name.toLowerCase());
-      if (duplicate) {
-        showToast('Another item already has that name');
-        return;
-      }
-
-      item.name = name;
-      item.location = location;
-      item.supplier = supplier;
-      item.unit = unit;
-      editingItemId = null;
-      saveState();
-      renderManageView();
-      showToast('Item updated');
-    }
-
-    function deleteMasterItem(itemId) {
-      state.items = state.items.filter(i => i.id !== itemId);
-      saveState();
-      renderManageView();
-      showToast('Item removed');
-    }
-
-    function renderManageEntities(panel, type) {
-      const isLoc = type === 'location';
-      const list = isLoc ? state.locations : state.suppliers;
-      const label = isLoc ? 'Stocking Location' : 'Supplier';
-
-      panel.innerHTML = `
-        <div class="space-y-4">
-          <form onsubmit="handleAddEntity(event, '${type}')" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row gap-2.5">
-            <input id="new-entity-name" type="text" required placeholder="New ${label} name..."
-              class="flex-1 min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#C82333]" />
-            <button type="submit" class="min-h-[44px] px-5 py-2 rounded-xl bg-[#15803D] hover:bg-[#16A34A] text-white font-bold text-sm">
-              + Add ${label}
-            </button>
-          </form>
-
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm divide-y divide-slate-100">
-            ${list.map(name => {
-              const count = state.items.filter(it => (isLoc ? it.location : it.supplier) === name).length;
-              return `
-                <div class="p-3.5 sm:px-5 flex items-center justify-between gap-3">
-                  <div>
-                    <div class="font-bold text-sm text-slate-900">${escapeHtml(name)}</div>
-                    <div class="text-xs text-slate-500">${count} ${count === 1 ? 'item' : 'items'} assigned</div>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <button onclick="openRenameEntityModal('${type}', '${escapeJs(name)}')" class="min-h-[40px] px-3 rounded-xl border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700">Rename</button>
-                    <button onclick="attemptDeleteEntity('${type}', '${escapeJs(name)}')" class="min-h-[40px] px-3 rounded-xl border border-red-200 hover:bg-red-50 text-xs font-bold text-[#C82333]">Delete</button>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    function handleAddEntity(e, type) {
-      e.preventDefault();
-      const val = document.getElementById('new-entity-name').value.trim();
-      if (!val) return;
-      const list = type === 'location' ? state.locations : state.suppliers;
-      if (list.some(x => x.toLowerCase() === val.toLowerCase())) {
-        showToast('Already exists');
-        return;
-      }
-      list.push(val);
-      if (type === 'location' && !state.activeLocation) state.activeLocation = val;
-      saveState();
-      renderManageView();
-      showToast('Added ' + val);
-    }
-
-    function openRenameEntityModal(type, oldName) {
-      openModal(`
-        <form onsubmit="confirmRenameEntity(event, '${type}', '${escapeJs(oldName)}')" class="space-y-3">
-          <h3 class="text-lg font-extrabold text-slate-900">Rename ${type === 'location' ? 'Location' : 'Supplier'}</h3>
-          <input id="rename-entity-input" type="text" required value="${escapeHtml(oldName)}"
-            class="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 text-sm" />
-          <div class="flex justify-end gap-2 pt-2">
-            <button type="button" onclick="closeModal()" class="min-h-[44px] px-4 rounded-xl border border-slate-300 font-bold text-sm">Cancel</button>
-            <button type="submit" class="min-h-[44px] px-4 rounded-xl bg-[#0B0B0C] text-white font-bold text-sm">Save Name</button>
-          </div>
-        </form>
-      `);
-    }
-
-    function confirmRenameEntity(e, type, oldName) {
-      e.preventDefault();
-      const newName = document.getElementById('rename-entity-input').value.trim();
-      if (!newName || newName === oldName) {
-        closeModal();
-        return;
-      }
-      const list = type === 'location' ? state.locations : state.suppliers;
-      if (list.some(x => x.toLowerCase() === newName.toLowerCase())) {
-        showToast('Name already in use');
-        return;
-      }
-      const idx = list.indexOf(oldName);
-      if (idx !== -1) list[idx] = newName;
-
-      state.items.forEach(it => {
-        if (type === 'location' && it.location === oldName) it.location = newName;
-        if (type === 'supplier' && it.supplier === oldName) it.supplier = newName;
-      });
-      if (type === 'location' && state.activeLocation === oldName) state.activeLocation = newName;
-
-      saveState();
-      closeModal();
-      renderManageView();
-      showToast('Renamed to ' + newName);
-    }
-
-    function attemptDeleteEntity(type, name) {
-      const isLoc = type === 'location';
-      const list = isLoc ? state.locations : state.suppliers;
-      const assigned = state.items.filter(it => (isLoc ? it.location : it.supplier) === name);
-
-      if (assigned.length === 0) {
-        if (isLoc) {
-          state.locations = state.locations.filter(l => l !== name);
-          if (state.activeLocation === name) state.activeLocation = state.locations[0] || '';
-        } else {
-          state.suppliers = state.suppliers.filter(s => s !== name);
-        }
-        saveState();
-        renderManageView();
-        showToast('Deleted ' + name);
-        return;
-      }
-
-      const alternatives = list.filter(x => x !== name);
-      if (alternatives.length === 0) {
-        showToast('Create another ' + type + ' first before deleting this one');
-        return;
-      }
-
-      openModal(`
-        <form onsubmit="confirmReassignAndDelete(event, '${type}', '${escapeJs(name)}')" class="space-y-3">
-          <h3 class="text-lg font-extrabold text-slate-900">Reassign ${assigned.length} Items &amp; Delete</h3>
-          <p class="text-sm text-slate-600">
-            <strong>${escapeHtml(name)}</strong> currently has <strong>${assigned.length}</strong> assigned ${assigned.length === 1 ? 'item' : 'items'}. Move them to:
-          </p>
-          <select id="reassign-target-select" class="w-full min-h-[44px] px-3 rounded-xl border border-slate-300 text-sm bg-white">
-            ${alternatives.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('')}
-          </select>
-          <div class="flex justify-end gap-2 pt-2">
-            <button type="button" onclick="closeModal()" class="min-h-[44px] px-4 rounded-xl border border-slate-300 font-bold text-sm">Cancel</button>
-            <button type="submit" class="min-h-[44px] px-4 rounded-xl bg-[#C82333] text-white font-bold text-sm">Reassign &amp; Delete</button>
-          </div>
-        </form>
-      `);
-    }
-
-    function confirmReassignAndDelete(e, type, oldName) {
-      e.preventDefault();
-      const target = document.getElementById('reassign-target-select').value;
-      const isLoc = type === 'location';
-
-      state.items.forEach(it => {
-        if (isLoc && it.location === oldName) it.location = target;
-        if (!isLoc && it.supplier === oldName) it.supplier = target;
-      });
-
-      if (isLoc) {
-        state.locations = state.locations.filter(l => l !== oldName);
-        if (state.activeLocation === oldName) state.activeLocation = target;
-      } else {
-        state.suppliers = state.suppliers.filter(s => s !== oldName);
-      }
-
-      saveState();
-      closeModal();
-      renderManageView();
-      showToast(`Reassigned to ${target} & deleted ${oldName}`);
-    }
-
-    // =========================================================================
-    // 7. RFC-4180 CSV EXPORT & OVERWRITE BULK IMPORT
-    // =========================================================================
-    function csvEscape(val) {
-      const str = String(val ?? '');
-      if (str.includes('"') || str.includes(',') || str.includes('
-') || str.includes('')) {
-        return '"' + str.replace(/"/g, '""') + '"';
-      }
-      return str;
+      const list = document.getElementById("manage-items-list");
+      list.innerHTML = state.items
+        .map((it) => "<div class='p-3.5 flex items-center justify-between gap-2'><div><div class='font-bold text-sm'>" + it.name + "</div><div class='text-xs text-slate-500'>" + it.location + " • " + it.supplier + " • " + it.unit + "</div></div></div>")
+        .join("");
     }
 
     function exportCSV() {
-      const header = ['Item Name', 'Stocking Location', 'Supplier', 'Unit'];
-      // Export grouped by stocking location in exact shelf order
-      const orderedItems = [];
-      state.locations.forEach(loc => {
-        state.items.filter(it => it.location === loc).forEach(it => orderedItems.push(it));
-      });
-      state.items.forEach(it => {
-        if (!orderedItems.includes(it)) orderedItems.push(it);
-      });
-
-      const lines = [header.join(',')];
-      orderedItems.forEach(it => {
-        lines.push([csvEscape(it.name), csvEscape(it.location), csvEscape(it.supplier), csvEscape(it.unit)].join(','));
-      });
-
-      const blob = new Blob(['﻿' + lines.join('
-')], { type: 'text/csv;charset=utf-8;' });
+      const rows = ["Item Name,Stocking Location,Supplier,Unit"].concat(
+        state.items.map((i) => '"' + i.name.replace(/"/g, '""') + '","' + i.location.replace(/"/g, '""') + '","' + i.supplier.replace(/"/g, '""') + '","' + i.unit.replace(/"/g, '""') + '"')
+      );
+      const blob = new Blob([rows.join("\r\n")], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = 'barracos-stock-master.csv';
-      document.body.appendChild(a);
+      a.download = "barracos-stock-master.csv";
       a.click();
-      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast('Exported barracos-stock-master.csv');
     }
 
-    function parseCSV(text) {
-      const clean = text.replace(/^﻿/, '');
-      const rows = [];
-      let row = [];
-      let cell = '';
-      let inQuotes = false;
-
-      for (let i = 0; i < clean.length; i++) {
-        const ch = clean[i];
-        const next = clean[i + 1];
-        if (inQuotes) {
-          if (ch === '"' && next === '"') {
-            cell += '"';
-            i++;
-          } else if (ch === '"') {
-            inQuotes = false;
-          } else {
-            cell += ch;
-          }
-        } else {
-          if (ch === '"') {
-            inQuotes = true;
-          } else if (ch === ',') {
-            row.push(cell.trim());
-            cell = '';
-          } else if (ch === '' && next === '
-') {
-            row.push(cell.trim());
-            rows.push(row);
-            row = [];
-            cell = '';
-            i++;
-          } else if (ch === '
-' || ch === '') {
-            row.push(cell.trim());
-            rows.push(row);
-            row = [];
-            cell = '';
-          } else {
-            cell += ch;
-          }
-        }
-      }
-      if (cell.length > 0 || row.length > 0) {
-        row.push(cell.trim());
-        rows.push(row);
-      }
-      return rows.filter(r => r.some(c => c !== ''));
-    }
-
-    function handleCSVFileSelect(event) {
-      const file = event.target.files && event.target.files[0];
-      event.target.value = '';
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        const rows = parseCSV(String(reader.result || ''));
-        if (rows.length < 2) {
-          showToast('CSV file appears empty');
-          return;
-        }
-
-        // Skip header row if it matches expected labels
-        const first = rows[0].map(c => c.toLowerCase());
-        const startIdx = (first[0].includes('item') || first[1].includes('location')) ? 1 : 0;
-
-        const seenNames = new Set();
-        const newLocations = [];
-        const newSuppliers = [];
-        const newItems = [];
-
-        for (let i = startIdx; i < rows.length; i++) {
-          const [rawName, rawLoc, rawSup, rawUnit] = rows[i];
-          const name = (rawName || '').trim();
-          const location = (rawLoc || '').trim();
-          const supplier = (rawSup || '').trim();
-          const unit = (rawUnit || 'Each').trim();
-
-          if (!name || !location || !supplier) continue;
-          const key = name.toLowerCase();
-          if (seenNames.has(key)) continue;
-          seenNames.add(key);
-
-          // Normalize case against already-seen locations/suppliers
-          let canonLoc = newLocations.find(l => l.toLowerCase() === location.toLowerCase());
-          if (!canonLoc) {
-            canonLoc = location;
-            newLocations.push(canonLoc);
-          }
-
-          let canonSup = newSuppliers.find(s => s.toLowerCase() === supplier.toLowerCase());
-          if (!canonSup) {
-            canonSup = supplier;
-            newSuppliers.push(canonSup);
-          }
-
-          newItems.push({
-            id: 'csv_' + i + '_' + Math.random().toString(36).slice(2, 6),
-            name,
-            location: canonLoc,
-            supplier: canonSup,
-            unit,
-            qty: 0
-          });
-        }
-
-        if (newItems.length === 0) {
-          showToast('No valid rows found in CSV');
-          return;
-        }
-
-        openModal(`
-          <div class="space-y-3">
-            <h3 class="text-lg font-extrabold text-slate-900">Overwrite Master Stock List?</h3>
-            <p class="text-sm text-slate-600">
-              Parsed <strong>${newItems.length}</strong> unique items across <strong>${newLocations.length}</strong> locations and <strong>${newSuppliers.length}</strong> suppliers. Uploading will replace your current master list and reset daily counts.
-            </p>
-            <div class="flex justify-end gap-2 pt-2">
-              <button onclick="closeModal()" class="min-h-[44px] px-4 rounded-xl border border-slate-300 font-bold text-sm">Cancel</button>
-              <button id="confirm-csv-btn" class="min-h-[44px] px-4 rounded-xl bg-[#C82333] text-white font-bold text-sm">Overwrite Master List</button>
-            </div>
-          </div>
-        `);
-
-        document.getElementById('confirm-csv-btn').onclick = () => {
-          state = {
-            items: newItems,
-            locations: newLocations,
-            suppliers: newSuppliers,
-            completedSuppliers: {},
-            activeLocation: newLocations[0] || '',
-            selectedSupplier: ''
-          };
-          saveState();
-          closeModal();
-          renderManageView();
-          showToast(`Imported ${newItems.length} items from CSV`);
-        };
-      };
-      reader.readAsText(file);
-    }
-
-    // =========================================================================
-    // 8. MODALS, TOASTS, ESCAPING & SERVICE WORKER REGISTRATION
-    // =========================================================================
-    function openManualCopyModal(supplierName, text) {
-      openModal(`
-        <div class="space-y-3">
-          <h3 class="text-lg font-extrabold text-slate-900">Copy Order for ${escapeHtml(supplierName)}</h3>
-          <p class="text-xs text-slate-500">Tap inside the box below to select all and copy into your texting app:</p>
-          <textarea readonly rows="8" onclick="this.select()" class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs bg-slate-50">${escapeHtml(text)}</textarea>
-          <div class="flex justify-end">
-            <button onclick="closeModal()" class="min-h-[44px] px-5 rounded-xl bg-[#0B0B0C] text-white font-bold text-sm">Done</button>
-          </div>
-        </div>
-      `);
-    }
-
-    function openModal(html) {
-      document.getElementById('modal-box').innerHTML = html;
-      document.getElementById('modal-backdrop').classList.remove('hidden');
-    }
-
-    function closeModal() {
-      document.getElementById('modal-backdrop').classList.add('hidden');
-    }
-
-    let toastTimer = null;
-    function showToast(msg) {
-      const el = document.getElementById('toast');
-      document.getElementById('toast-inner').textContent = msg;
-      el.classList.remove('opacity-0');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => el.classList.add('opacity-0'), 2400);
-    }
-
-    function escapeHtml(str) {
-      return String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function escapeJs(str) {
-      return String(str ?? '').replace(/\/g, '\\').replace(/'/g, "\'");
-    }
-
-    // Register external Service Worker when hosted over HTTPS / localhost (GitHub Pages)
-    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
-      });
-    }
-
-    // Boot initial view
     renderCountView();
   </script>
 </body>
